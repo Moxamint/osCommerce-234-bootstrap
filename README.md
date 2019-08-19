@@ -1,49 +1,72 @@
-osCommerce-234-bootstrap
-=========================
+# CE Phoenix
 
-osCommerce 2.3.4 with Bootstrap, what more needs to be said.  
+Phoenix is the Community Version of osCommerce
 
-The point is to try to keep changes to a minimum as this will allow easy porting of Addons.
+![Phoenix Logo](https://raw.githubusercontent.com/gburton/Responsive-osCommerce/master/.github/ce-phoenix.png)
 
+# Demo Site
 
-This will be an ongoing COMMUNITY effort.  
+https://template.me.uk/phoenix/index.php
 
-If you cannot code, you can still help;
+## External Libraries
 
-Check out the demo site at http://template.me.uk/2334bs3/ - have a look around and note any areas that you feel need attention, then post your feedback at http://forums.oscommerce.com/topic/396152-bootstrap-3-in-2334-responsive-from-the-get-go/
+https://github.com/gburton/Responsive-osCommerce/wiki/External-Libraries
 
-Are you a Coder ?
-Please fork this project and start coding.  Let me know your Github Project URL by posting at http://forums.oscommerce.com/topic/396152-bootstrap-3-in-2334-responsive-from-the-get-go/   
+### PHP Version
 
-Not a Coder ...
-Please support this project by giving as much feedback as you possibly can.  Or by donating beer to the coders.
+Minimum | Maximum
+------------ | -------------
+7.0 | 7.3
 
-How to keep a clean Master copy using Github
-============================================
+### User Checklist
 
-I have put together a couple of videos.
-1.  shows how to create a new Github account and Fork this project.
-2.  shows how to check for new commits to this project and pull them into your own Fork.
+- [x] read this README document
+- [ ] download Phoenix & perform installation
+- [ ] check security page in administrative area.  admin > tools > security checks
+- [ ] join osCommerce forum
+- [ ] consider joining Phoenix club
+- [ ] install one or more navbar modules.  admin > modules > navbar modules > {install}
+- [ ] install one or more footer modules.  admin > modules > content > {install}
+- [ ] install one or more box modules.  admin > modules > boxes > {install}
+- [ ] install shipping module(s).  admin > modules > shipping
+- [ ] install payment module(s).  admin > modules > payment
+- [ ] perform a test checkout
+- [ ] load your categories and products
 
-You can find these videos at http://forums.oscommerce.com/topic/396152-bootstrap-3-in-2334-responsive-from-the-get-go/?p=1709648
+### Image Credits
 
+Images in the default installation are copyright their respective owners;
 
-Installation
-============
+Image | Owner | Usage
+------------ | ------------- | -------------
+osCommerce Logo | osCommerce | https://www.oscommerce.com/Us&Legal#legalTabContentTrademark
+Phoenix Logo | G Burton | Phoenix Logo may not be used without prior written permission from the copyright owner.
+Oranges | Eelffica from Pixabay | https://pixabay.com/service/license/
+Lemons | Eelffica from Pixabay | https://pixabay.com/service/license/
+Pears | Eelffica from Pixabay | https://pixabay.com/service/license/
+Apples | Eelffica from Pixabay | https://pixabay.com/service/license/
+Tomatoes | Rocky_H from Pixabay | https://pixabay.com/service/license/
+Heart | Gerhard Gellinger from Pixabay | https://pixabay.com/service/license/
 
-Install as if this is a new osCommerce installation.  Then enter the admin area and turn on 3 new Header Tag modules;
+### Thank You
 
-1.  colorbox
-2.  datepicker
-3.  grid/list view
+To all shopowners, developers, consultants and business owners who have supported the project over the years.
 
-The functionality of these have been moved to header tag modules so that the site will only load them on the pages needed rather than on all pages.  Admin > Modules > Header Tags > {install}
+### Support the Project
 
-You also need to install other components such as the logo, breadcrumb, footer boxes, side column boxes and so on.  Admin > Modules > Boxes > {install} AND Admin > Modules > Content > {install}.  Boxes and Modules can be sorted using the sort order, lowest is displayed first.
+If you or your employer is commercially dependent on Phoenix (or a previous incarnation), please help to sponsor continual forward movement in the code-base. Phoenix needs you as much as you need Phoenix!
 
-Database Conversion Script
-==========================
+I am hopeful that all shopowners, developers, consultants and businesses ... will join the Phoenix Club to allow two professional developers to work on the code on an ad-hoc basis.  
 
-This script will change a 2.3.4 Database into a fully useable database for osCommerce-234-Bootstrap.
+### Join the Phoenix Club
 
-http://forums.oscommerce.com/topic/399678-234normal-to-234responsive-database-conversion-script/
+If you wish to help support the Phoenix project and steer the future direction of the software please join the Phoenix Club
+https://forums.oscommerce.com/clubs/1-phoenix/
+
+### Other Languages
+
+Language | URL | Credit & Thanks
+------------ | ------------- | -------------
+German | https://github.com/cupidare/OsCommerce-CE-Phoenix-German-language-Deutsches-Sprachpaket | @cupidare
+Spanish | https://github.com/raiwa/OSCOM-CE-Phoenix-Spanish-language-idioma-espanol | @raiwa
+Russian | https://github.com/Agrosheriff/CE-Phoenix-1.0.0.4_RU | @Fredi

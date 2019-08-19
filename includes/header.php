@@ -5,44 +5,38 @@
   osCommerce, Open Source E-Commerce Solutions
   http://www.oscommerce.com
 
-  Copyright (c) 2010 osCommerce
+  Copyright (c) 2018 osCommerce
 
   Released under the GNU General Public License
 */
-
-  if ($messageStack->size('header') > 0) {
-    echo '<div class="col-md-12">' . $messageStack->output('header') . '</div>';
-  }
 ?>
 
-<div class="modular-header">
+<div class="row">
   <?php echo $oscTemplate->getContent('header'); ?>
 </div>
 
-<div class="clearfix"></div>
-
-<div class="body-sans-header clearfix">
+<div class="body-sans-header">
 
 <?php
-  if (isset($HTTP_GET_VARS['error_message']) && tep_not_null($HTTP_GET_VARS['error_message'])) {
+  if (isset($_GET['error_message']) && tep_not_null($_GET['error_message'])) {
 ?>
-<div class="clearfix"></div>
+<div class="w-100"></div>
 <div class="col-xs-12">
-  <div class="alert alert-danger">
-    <a href="#" class="close glyphicon glyphicon-remove" data-dismiss="alert"></a>
-    <?php echo htmlspecialchars(stripslashes(urldecode($HTTP_GET_VARS['error_message']))); ?>
+  <div class="alert alert-danger" role="alert">
+    <a href="#" class="close fas fa-times" data-dismiss="alert"></a>
+    <?php echo htmlspecialchars(stripslashes(urldecode($_GET['error_message']))); ?>
   </div>
 </div>
 <?php
   }
 
-  if (isset($HTTP_GET_VARS['info_message']) && tep_not_null($HTTP_GET_VARS['info_message'])) {
+  if (isset($_GET['info_message']) && tep_not_null($_GET['info_message'])) {
 ?>
-<div class="clearfix"></div>
+<div class="w-100"></div>
 <div class="col-xs-12">
-  <div class="alert alert-info">
-    <a href="#" class="close glyphicon glyphicon-remove" data-dismiss="alert"></a>
-    <?php echo htmlspecialchars(stripslashes(urldecode($HTTP_GET_VARS['info_message']))); ?>
+  <div class="alert alert-info" role="alert">
+    <a href="#" class="close fas fa-times" data-dismiss="alert"></a>
+    <?php echo htmlspecialchars(stripslashes(urldecode($_GET['info_message']))); ?>
   </div>
 </div>
 <?php

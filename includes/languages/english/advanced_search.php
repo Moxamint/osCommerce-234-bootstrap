@@ -5,7 +5,7 @@
   osCommerce, Open Source E-Commerce Solutions
   http://www.oscommerce.com
 
-  Copyright (c) 2003 osCommerce
+  Copyright (c) 2018 osCommerce
 
   Released under the GNU General Public License
 */
@@ -27,7 +27,15 @@ define('ENTRY_PRICE_TO', 'Price To');
 define('ENTRY_DATE_FROM', 'Date From');
 define('ENTRY_DATE_TO', 'Date To');
 
-define('TEXT_SEARCH_HELP_LINK', '<span class="glyphicon glyphicon-info-sign"></span> Search Help');
+define('ENTRY_PRICE_FROM_TEXT', 'From');
+define('ENTRY_PRICE_TO_TEXT', 'To');
+define('ENTRY_DATE_FROM_TEXT', 'From');
+define('ENTRY_DATE_TO_TEXT', 'To');
+
+define('ENTRY_DATE', 'Date');
+define('ENTRY_PRICE', 'Price');
+
+define('TEXT_SEARCH_HELP_LINK', '<i class="fas fa-info-circle"></i> Search Help');
 
 define('TEXT_ALL_CATEGORIES', 'All Categories');
 define('TEXT_ALL_MANUFACTURERS', 'All Manufacturers');
@@ -46,4 +54,6 @@ define('ERROR_PRICE_FROM_MUST_BE_NUM', 'Price From must be a number.');
 define('ERROR_PRICE_TO_MUST_BE_NUM', 'Price To must be a number.');
 define('ERROR_PRICE_TO_LESS_THAN_PRICE_FROM', 'Price To must be greater than or equal to Price From.');
 define('ERROR_INVALID_KEYWORDS', 'Invalid keywords.');
-?>
+
+// text for date of birth example
+define('DOB_FORMAT_STRING', 'mm/dd/yyyy');

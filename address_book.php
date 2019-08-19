@@ -5,7 +5,7 @@
   osCommerce, Open Source E-Commerce Solutions
   http://www.oscommerce.com
 
-  Copyright (c) 2010 osCommerce
+  Copyright (c) 2018 osCommerce
 
   Released under the GNU General Public License
 */
@@ -14,20 +14,18 @@
 
   if (!tep_session_is_registered('customer_id')) {
     $navigation->set_snapshot();
-    tep_redirect(tep_href_link(FILENAME_LOGIN, '', 'SSL'));
+    tep_redirect(tep_href_link('login.php', '', 'SSL'));
   }
 
-  require(DIR_WS_LANGUAGES . $language . '/' . FILENAME_ADDRESS_BOOK);
+  require('includes/languages/' . $language . '/address_book.php');
 
-  $breadcrumb->add(NAVBAR_TITLE_1, tep_href_link(FILENAME_ACCOUNT, '', 'SSL'));
-  $breadcrumb->add(NAVBAR_TITLE_2, tep_href_link(FILENAME_ADDRESS_BOOK, '', 'SSL'));
+  $breadcrumb->add(NAVBAR_TITLE_1, tep_href_link('account.php', '', 'SSL'));
+  $breadcrumb->add(NAVBAR_TITLE_2, tep_href_link('address_book.php', '', 'SSL'));
 
-  require(DIR_WS_INCLUDES . 'template_top.php');
+  require('includes/template_top.php');
 ?>
 
-<div class="page-header">
-  <h1><?php echo HEADING_TITLE; ?></h1>
-</div>
+<h1 class="display-4"><?php echo HEADING_TITLE; ?></h1>
 
 <?php
   if ($messageStack->size('addressbook') > 0) {
@@ -36,64 +34,67 @@
 ?>
 
 <div class="contentContainer">
-  <h2><?php echo PRIMARY_ADDRESS_TITLE; ?></h2>
+  
+  <h4><?php echo PRIMARY_ADDRESS_TITLE; ?></h4>
 
-  <div class="contentText row">
+  <div class="row">
+  
     <div class="col-sm-8">
-      <div class="alert alert-warning"><?php echo PRIMARY_ADDRESS_DESCRIPTION; ?></div>
+      <div class="alert alert-info" role="alert"><?php echo PRIMARY_ADDRESS_DESCRIPTION; ?></div>
     </div>
+    
     <div class="col-sm-4">
-      <div class="panel panel-primary">
-        <div class="panel-heading"><?php echo PRIMARY_ADDRESS_TITLE; ?></div>
+      <div class="card text-white bg-info">
+        <div class="card-header"><?php echo PRIMARY_ADDRESS_TITLE; ?></div>
 
-        <div class="panel-body">
+        <div class="card-body">
           <?php echo tep_address_label($customer_id, $customer_default_address_id, true, ' ', '<br />'); ?>
         </div>
       </div>
     </div>
+    
   </div>
 
-  <div class="clearfix"></div>
+  <div class="w-100"></div>
 
-  <h2><?php echo ADDRESS_BOOK_TITLE; ?></h2>
+  <h4><?php echo ADDRESS_BOOK_TITLE; ?></h4>
   
-  <div class="alert alert-warning"><?php echo sprintf(TEXT_MAXIMUM_ENTRIES, MAX_ADDRESS_BOOK_ENTRIES); ?></div>
+  <div class="alert alert-danger" role="alert"><?php echo sprintf(TEXT_MAXIMUM_ENTRIES, MAX_ADDRESS_BOOK_ENTRIES); ?></div>
 
-  <div class="contentText row">
+  <div class="row">
 <?php
-  $addresses_query = tep_db_query("select address_book_id, entry_firstname as firstname, entry_lastname as lastname, entry_company as company, entry_street_address as street_address, entry_suburb as suburb, entry_city as city, entry_postcode as postcode, entry_state as state, entry_zone_id as zone_id, entry_country_id as country_id from " . TABLE_ADDRESS_BOOK . " where customers_id = '" . (int)$customer_id . "' order by firstname, lastname");
+  $addresses_query = tep_db_query("select address_book_id, entry_firstname as firstname, entry_lastname as lastname, entry_company as company, entry_street_address as street_address, entry_suburb as suburb, entry_city as city, entry_postcode as postcode, entry_state as state, entry_zone_id as zone_id, entry_country_id as country_id from address_book where customers_id = '" . (int)$customer_id . "' order by firstname, lastname");
   while ($addresses = tep_db_fetch_array($addresses_query)) {
     $format_id = tep_get_address_format_id($addresses['country_id']);
 ?>
-      <div class="col-sm-4">
-        <div class="panel panel-<?php echo ($addresses['address_book_id'] == $customer_default_address_id) ? 'primary' : 'default'; ?>">
-          <div class="panel-heading"><?php echo tep_output_string_protected($addresses['firstname'] . ' ' . $addresses['lastname']); ?></strong><?php if ($addresses['address_book_id'] == $customer_default_address_id) echo '&nbsp;<small><i>' . PRIMARY_ADDRESS . '</i></small>'; ?></div>
-          <div class="panel-body">
-            <?php echo tep_address_format($format_id, $addresses, true, ' ', '<br />'); ?>
-          </div>
-          <div class="panel-footer text-center"><?php echo tep_draw_button(SMALL_IMAGE_BUTTON_EDIT, 'glyphicon glyphicon-file', tep_href_link(FILENAME_ADDRESS_BOOK_PROCESS, 'edit=' . $addresses['address_book_id'], 'SSL')) . ' ' . tep_draw_button(SMALL_IMAGE_BUTTON_DELETE, 'glyphicon glyphicon-trash', tep_href_link(FILENAME_ADDRESS_BOOK_PROCESS, 'delete=' . $addresses['address_book_id'], 'SSL')); ?></div>
+    <div class="col-sm-4">
+      <div class="card <?php echo ($addresses['address_book_id'] == $customer_default_address_id) ? ' text-white bg-info' : ' bg-light'; ?>">
+        <div class="card-header"><?php echo tep_output_string_protected($addresses['firstname'] . ' ' . $addresses['lastname']); ?></strong><?php if ($addresses['address_book_id'] == $customer_default_address_id) echo '&nbsp;<small><i>' . PRIMARY_ADDRESS . '</i></small>'; ?></div>
+        <div class="card-body">
+          <?php echo tep_address_format($format_id, $addresses, true, ' ', '<br />'); ?>
         </div>
+        <div class="card-footer text-center"><?php echo tep_draw_button(SMALL_IMAGE_BUTTON_EDIT, 'fas fa-file', tep_href_link('address_book_process.php', 'edit=' . $addresses['address_book_id'], 'SSL'), null, null, 'btn btn-dark btn-sm') . ' ' . tep_draw_button(SMALL_IMAGE_BUTTON_DELETE, 'fas fa-trash-alt', tep_href_link('address_book_process.php', 'delete=' . $addresses['address_book_id'], 'SSL'), null, null, 'btn btn-dark btn-sm'); ?></div>
       </div>
+    </div>
 <?php
   }
 ?>
   </div>
   
-  <div class="clearfix"></div>
-
-  <div class="buttonSet row">
-    <div class="col-xs-6"><?php echo tep_draw_button(IMAGE_BUTTON_BACK, 'glyphicon glyphicon-chevron-left', tep_href_link(FILENAME_ACCOUNT, '', 'SSL')); ?></div>
+  <div class="buttonSet">
 <?php
   if (tep_count_customer_address_book_entries() < MAX_ADDRESS_BOOK_ENTRIES) {
 ?>
-    <div class="col-xs-6 text-right"><?php echo tep_draw_button(IMAGE_BUTTON_ADD_ADDRESS, 'glyphicon glyphicon-home', tep_href_link(FILENAME_ADDRESS_BOOK_PROCESS, '', 'SSL'), 'primary'); ?></div>
+    <div class="text-right"><?php echo tep_draw_button(IMAGE_BUTTON_ADD_ADDRESS, 'fas fa-home', tep_href_link('address_book_process.php', '', 'SSL'), 'primary', null, 'btn-success btn-lg btn-block'); ?></div>
 <?php
   }
 ?>
+    <p><?php echo tep_draw_button(IMAGE_BUTTON_BACK, 'fas fa-angle-left', tep_href_link('account.php', '', 'SSL')); ?></p>
   </div>
+
 </div>
 
 <?php
-  require(DIR_WS_INCLUDES . 'template_bottom.php');
-  require(DIR_WS_INCLUDES . 'application_bottom.php');
+  require('includes/template_bottom.php');
+  require('includes/application_bottom.php');
 ?>

@@ -13,7 +13,7 @@
   class authorizenet_cc_dpm {
     var $code, $title, $description, $enabled;
 
-    function authorizenet_cc_dpm() {
+    function __construct() {
       global $order;
 
       $this->signature = 'authorizenet|authorizenet_cc_dpm|1.0|2.3';
@@ -60,7 +60,7 @@
 
       if ( ($this->enabled == true) && ((int)MODULE_PAYMENT_AUTHORIZENET_CC_DPM_ZONE > 0) ) {
         $check_flag = false;
-        $check_query = tep_db_query("select zone_id from " . TABLE_ZONES_TO_GEO_ZONES . " where geo_zone_id = '" . MODULE_PAYMENT_AUTHORIZENET_CC_DPM_ZONE . "' and zone_country_id = '" . $order->billing['country']['id'] . "' order by zone_id");
+        $check_query = tep_db_query("select zone_id from zones_to_geo_zones where geo_zone_id = '" . MODULE_PAYMENT_AUTHORIZENET_CC_DPM_ZONE . "' and zone_country_id = '" . $order->billing['country']['id'] . "' order by zone_id");
         while ($check = tep_db_fetch_array($check_query)) {
           if ($check['zone_id'] < 1) {
             $check_flag = true;
@@ -145,7 +145,7 @@ EOD;
                       'x_show_form' => 'PAYMENT_FORM',
                       'x_delim_data' => 'FALSE',
                       'x_relay_response' => 'TRUE',
-                      'x_relay_url' => tep_href_link(FILENAME_CHECKOUT_PROCESS, '', 'SSL', false),
+                      'x_relay_url' => tep_href_link('checkout_process.php', '', 'SSL', false),
                       'x_company' => substr($order->billing['company'], 0, 50),
                       'x_address' => substr($order->billing['street_address'], 0, 60),
                       'x_city' => substr($order->billing['city'], 0, 40),
@@ -165,7 +165,7 @@ EOD;
                       'x_fp_sequence' => $sequence,
                       'x_fp_timestamp' => $tstamp,
                       'x_fp_hash' => $this->_hmac(MODULE_PAYMENT_AUTHORIZENET_CC_DPM_TRANSACTION_KEY, MODULE_PAYMENT_AUTHORIZENET_CC_DPM_LOGIN_ID . '^' . $sequence . '^' . $tstamp . '^' . $this->format_raw($order->info['total']) . '^' . $currency),
-                      'x_cancel_url' => tep_href_link(FILENAME_SHOPPING_CART, '', 'SSL'),
+                      'x_cancel_url' => tep_href_link('shopping_cart.php', '', 'SSL'),
                       'x_cancel_url_text' => MODULE_PAYMENT_AUTHORIZENET_CC_DPM_TEXT_RETURN_BUTTON);
 
       if (is_numeric($sendto) && ($sendto > 0)) {
@@ -211,7 +211,7 @@ EOD;
     }
 
     function before_process() {
-      global $HTTP_POST_VARS, $order, $authorizenet_cc_dpm_error;
+      global $order, $authorizenet_cc_dpm_error;
 
       $error = false;
       $authorizenet_cc_dpm_error = false;
@@ -222,26 +222,26 @@ EOD;
                            'x_amount');
 
       foreach ( $check_array as $check ) {
-        if ( !isset($HTTP_POST_VARS[$check]) || !is_string($HTTP_POST_VARS[$check]) || (strlen($HTTP_POST_VARS[$check]) < 1) ) {
+        if ( !isset($_POST[$check]) || !is_string($_POST[$check]) || (strlen($_POST[$check]) < 1) ) {
           $error = 'general';
           break;
         }
       }
 
       if ( $error === false ) {
-        if ( ($HTTP_POST_VARS['x_response_code'] == '1') || ($HTTP_POST_VARS['x_response_code'] == '4') ) {
-          if ( tep_not_null(MODULE_PAYMENT_AUTHORIZENET_CC_DPM_MD5_HASH) && (!isset($HTTP_POST_VARS['x_MD5_Hash']) || (strtoupper($HTTP_POST_VARS['x_MD5_Hash']) != strtoupper(md5(MODULE_PAYMENT_AUTHORIZENET_CC_DPM_MD5_HASH . MODULE_PAYMENT_AUTHORIZENET_CC_DPM_LOGIN_ID . $HTTP_POST_VARS['x_trans_id'] . $this->format_raw($order->info['total']))))) ) {
+        if ( ($_POST['x_response_code'] == '1') || ($_POST['x_response_code'] == '4') ) {
+          if ( tep_not_null(MODULE_PAYMENT_AUTHORIZENET_CC_DPM_MD5_HASH) && (!isset($_POST['x_MD5_Hash']) || (strtoupper($_POST['x_MD5_Hash']) != strtoupper(md5(MODULE_PAYMENT_AUTHORIZENET_CC_DPM_MD5_HASH . MODULE_PAYMENT_AUTHORIZENET_CC_DPM_LOGIN_ID . $_POST['x_trans_id'] . $this->format_raw($order->info['total']))))) ) {
             $error = 'verification';
-          } elseif ($HTTP_POST_VARS['x_amount'] != $this->format_raw($order->info['total'])) {
+          } elseif ($_POST['x_amount'] != $this->format_raw($order->info['total'])) {
             $error = 'verification';
           }
 
-          if ( ($error === false) && ($HTTP_POST_VARS['x_response_code'] == '4') ) {
+          if ( ($error === false) && ($_POST['x_response_code'] == '4') ) {
             if ( MODULE_PAYMENT_AUTHORIZENET_CC_DPM_REVIEW_ORDER_STATUS_ID > 0 ) {
               $order->info['order_status'] = MODULE_PAYMENT_AUTHORIZENET_CC_DPM_REVIEW_ORDER_STATUS_ID;
             }
           }
-        } elseif ($HTTP_POST_VARS['x_response_code'] == '2') {
+        } elseif ($_POST['x_response_code'] == '2') {
           $error = 'declined';
         } else {
           $error = 'general';
@@ -251,10 +251,10 @@ EOD;
       if ( $error !== false ) {
         $this->sendDebugEmail();
 
-        $authorizenet_cc_dpm_error = $HTTP_POST_VARS['x_response_reason_text'];
+        $authorizenet_cc_dpm_error = $_POST['x_response_reason_text'];
         tep_session_register('authorizenet_cc_dpm_error');
 
-        tep_redirect(tep_href_link(FILENAME_CHECKOUT_PAYMENT, 'payment_error=' . $this->code . '&error=' . $error, 'SSL'));
+        tep_redirect(tep_href_link('checkout_payment.php', 'payment_error=' . $this->code . '&error=' . $error, 'SSL'));
       }
 
       if ( tep_session_is_registered('authorizenet_cc_dpm_error') ) {
@@ -263,18 +263,18 @@ EOD;
     }
 
     function after_process() {
-      global $HTTP_POST_VARS, $insert_id;
+      global $insert_id;
 
-      $response = array('Response: ' . tep_db_prepare_input($HTTP_POST_VARS['x_response_reason_text']) . ' (' . tep_db_prepare_input($HTTP_POST_VARS['x_response_reason_code']) . ')',
-                        'Transaction ID: ' . tep_db_prepare_input($HTTP_POST_VARS['x_trans_id']));
+      $response = array('Response: ' . tep_db_prepare_input($_POST['x_response_reason_text']) . ' (' . tep_db_prepare_input($_POST['x_response_reason_code']) . ')',
+                        'Transaction ID: ' . tep_db_prepare_input($_POST['x_trans_id']));
 
       $avs_response = '?';
 
-      if ( isset($HTTP_POST_VARS['x_avs_code']) && is_string($HTTP_POST_VARS['x_avs_code']) && !empty($HTTP_POST_VARS['x_avs_code']) ) {
-        if ( defined('MODULE_PAYMENT_AUTHORIZENET_CC_DPM_TEXT_AVS_' . $HTTP_POST_VARS['x_avs_code']) ) {
-          $avs_response = constant('MODULE_PAYMENT_AUTHORIZENET_CC_DPM_TEXT_AVS_' . $HTTP_POST_VARS['x_avs_code']) . ' (' . $HTTP_POST_VARS['x_avs_code'] . ')';
+      if ( isset($_POST['x_avs_code']) && is_string($_POST['x_avs_code']) && !empty($_POST['x_avs_code']) ) {
+        if ( defined('MODULE_PAYMENT_AUTHORIZENET_CC_DPM_TEXT_AVS_' . $_POST['x_avs_code']) ) {
+          $avs_response = constant('MODULE_PAYMENT_AUTHORIZENET_CC_DPM_TEXT_AVS_' . $_POST['x_avs_code']) . ' (' . $_POST['x_avs_code'] . ')';
         } else {
-          $avs_response = $HTTP_POST_VARS['x_avs_code'];
+          $avs_response = $_POST['x_avs_code'];
         }
       }
 
@@ -282,11 +282,11 @@ EOD;
 
       $cvv2_response = '?';
 
-      if ( isset($HTTP_POST_VARS['x_cvv2_resp_code']) && is_string($HTTP_POST_VARS['x_cvv2_resp_code']) && !empty($HTTP_POST_VARS['x_cvv2_resp_code']) ) {
-        if ( defined('MODULE_PAYMENT_AUTHORIZENET_CC_DPM_TEXT_CVV2_' . $HTTP_POST_VARS['x_cvv2_resp_code']) ) {
-          $cvv2_response = constant('MODULE_PAYMENT_AUTHORIZENET_CC_DPM_TEXT_CVV2_' . $HTTP_POST_VARS['x_cvv2_resp_code']) . ' (' . $HTTP_POST_VARS['x_cvv2_resp_code'] . ')';
+      if ( isset($_POST['x_cvv2_resp_code']) && is_string($_POST['x_cvv2_resp_code']) && !empty($_POST['x_cvv2_resp_code']) ) {
+        if ( defined('MODULE_PAYMENT_AUTHORIZENET_CC_DPM_TEXT_CVV2_' . $_POST['x_cvv2_resp_code']) ) {
+          $cvv2_response = constant('MODULE_PAYMENT_AUTHORIZENET_CC_DPM_TEXT_CVV2_' . $_POST['x_cvv2_resp_code']) . ' (' . $_POST['x_cvv2_resp_code'] . ')';
         } else {
-          $cvv2_response = $HTTP_POST_VARS['x_cvv2_resp_code'];
+          $cvv2_response = $_POST['x_cvv2_resp_code'];
         }
       }
 
@@ -294,11 +294,11 @@ EOD;
 
       $cavv_response = '?';
 
-      if ( isset($HTTP_POST_VARS['x_cavv_response']) && is_string($HTTP_POST_VARS['x_cavv_response']) && !empty($HTTP_POST_VARS['x_cavv_response']) ) {
-        if ( defined('MODULE_PAYMENT_AUTHORIZENET_CC_DPM_TEXT_CAVV_' . $HTTP_POST_VARS['x_cavv_response']) ) {
-          $cavv_response = constant('MODULE_PAYMENT_AUTHORIZENET_CC_DPM_TEXT_CAVV_' . $HTTP_POST_VARS['x_cavv_response']) . ' (' . $HTTP_POST_VARS['x_cavv_response'] . ')';
+      if ( isset($_POST['x_cavv_response']) && is_string($_POST['x_cavv_response']) && !empty($_POST['x_cavv_response']) ) {
+        if ( defined('MODULE_PAYMENT_AUTHORIZENET_CC_DPM_TEXT_CAVV_' . $_POST['x_cavv_response']) ) {
+          $cavv_response = constant('MODULE_PAYMENT_AUTHORIZENET_CC_DPM_TEXT_CAVV_' . $_POST['x_cavv_response']) . ' (' . $_POST['x_cavv_response'] . ')';
         } else {
-          $cavv_response = $HTTP_POST_VARS['x_cavv_response'];
+          $cavv_response = $_POST['x_cavv_response'];
         }
       }
 
@@ -310,7 +310,7 @@ EOD;
                               'customer_notified' => '0',
                               'comments' => implode("\n", $response));
 
-      tep_db_perform(TABLE_ORDERS_STATUS_HISTORY, $sql_data_array);
+      tep_db_perform('orders_status_history', $sql_data_array);
 
       if ( ENABLE_SSL != true ) {
         global $cart;
@@ -324,7 +324,7 @@ EOD;
         tep_session_unregister('payment');
         tep_session_unregister('comments');
 
-        $redirect_url = tep_href_link(FILENAME_CHECKOUT_SUCCESS, '', 'SSL');
+        $redirect_url = tep_href_link('checkout_success.php', '', 'SSL');
 
         echo <<<EOD
 <form name="redirect" action="{$redirect_url}" method="post" target="_top">
@@ -343,11 +343,11 @@ EOD;
     }
 
     function get_error() {
-      global $HTTP_GET_VARS, $authorizenet_cc_dpm_error;
+      global $authorizenet_cc_dpm_error;
 
       $error_message = MODULE_PAYMENT_AUTHORIZENET_CC_DPM_ERROR_GENERAL;
 
-      switch ($HTTP_GET_VARS['error']) {
+      switch ($_GET['error']) {
         case 'verification':
           $error_message = MODULE_PAYMENT_AUTHORIZENET_CC_DPM_ERROR_VERIFICATION;
           break;
@@ -361,7 +361,7 @@ EOD;
           break;
       }
 
-      if ( ($HTTP_GET_VARS['error'] != 'verification') && tep_session_is_registered('authorizenet_cc_dpm_error') ) {
+      if ( ($_GET['error'] != 'verification') && tep_session_is_registered('authorizenet_cc_dpm_error') ) {
         $error_message = $authorizenet_cc_dpm_error;
 
         tep_session_unregister('authorizenet_cc_dpm_error');
@@ -375,7 +375,7 @@ EOD;
 
     function check() {
       if (!isset($this->_check)) {
-        $check_query = tep_db_query("select configuration_value from " . TABLE_CONFIGURATION . " where configuration_key = 'MODULE_PAYMENT_AUTHORIZENET_CC_DPM_STATUS'");
+        $check_query = tep_db_query("select configuration_value from configuration where configuration_key = 'MODULE_PAYMENT_AUTHORIZENET_CC_DPM_STATUS'");
         $this->_check = tep_db_num_rows($check_query);
       }
       return $this->_check;
@@ -409,12 +409,12 @@ EOD;
           $sql_data_array['use_function'] = $data['use_func'];
         }
 
-        tep_db_perform(TABLE_CONFIGURATION, $sql_data_array);
+        tep_db_perform('configuration', $sql_data_array);
       }
     }
 
     function remove() {
-      tep_db_query("delete from " . TABLE_CONFIGURATION . " where configuration_key in ('" . implode("', '", $this->keys()) . "')");
+      tep_db_query("delete from configuration where configuration_key in ('" . implode("', '", $this->keys()) . "')");
     }
 
     function keys() {
@@ -433,10 +433,10 @@ EOD;
 
     function getParams() {
       if (!defined('MODULE_PAYMENT_AUTHORIZENET_CC_DPM_TRANSACTION_ORDER_STATUS_ID')) {
-        $check_query = tep_db_query("select orders_status_id from " . TABLE_ORDERS_STATUS . " where orders_status_name = 'Authorize.net [Transactions]' limit 1");
+        $check_query = tep_db_query("select orders_status_id from orders_status where orders_status_name = 'Authorize.net [Transactions]' limit 1");
 
         if (tep_db_num_rows($check_query) < 1) {
-          $status_query = tep_db_query("select max(orders_status_id) as status_id from " . TABLE_ORDERS_STATUS);
+          $status_query = tep_db_query("select max(orders_status_id) as status_id from orders_status");
           $status = tep_db_fetch_array($status_query);
 
           $status_id = $status['status_id']+1;
@@ -444,12 +444,12 @@ EOD;
           $languages = tep_get_languages();
 
           foreach ($languages as $lang) {
-            tep_db_query("insert into " . TABLE_ORDERS_STATUS . " (orders_status_id, language_id, orders_status_name) values ('" . $status_id . "', '" . $lang['id'] . "', 'Authorize.net [Transactions]')");
+            tep_db_query("insert into orders_status (orders_status_id, language_id, orders_status_name) values ('" . $status_id . "', '" . $lang['id'] . "', 'Authorize.net [Transactions]')");
           }
 
-          $flags_query = tep_db_query("describe " . TABLE_ORDERS_STATUS . " public_flag");
+          $flags_query = tep_db_query("describe orders_status public_flag");
           if (tep_db_num_rows($flags_query) == 1) {
-            tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 0 and downloads_flag = 0 where orders_status_id = '" . $status_id . "'");
+            tep_db_query("update orders_status set public_flag = 0 and downloads_flag = 0 where orders_status_id = '" . $status_id . "'");
           }
         } else {
           $check = tep_db_fetch_array($check_query);
@@ -553,8 +553,6 @@ EOD;
     }
 
     function sendDebugEmail($response = array()) {
-      global $HTTP_POST_VARS, $HTTP_GET_VARS;
-
       if (tep_not_null(MODULE_PAYMENT_AUTHORIZENET_CC_DPM_DEBUG_EMAIL)) {
         $email_body = '';
 
@@ -562,12 +560,12 @@ EOD;
           $email_body .= 'RESPONSE:' . "\n\n" . print_r($response, true) . "\n\n";
         }
 
-        if (!empty($HTTP_POST_VARS)) {
-          $email_body .= '$HTTP_POST_VARS:' . "\n\n" . print_r($HTTP_POST_VARS, true) . "\n\n";
+        if (!empty($_POST)) {
+          $email_body .= '$_POST:' . "\n\n" . print_r($_POST, true) . "\n\n";
         }
 
-        if (!empty($HTTP_GET_VARS)) {
-          $email_body .= '$HTTP_GET_VARS:' . "\n\n" . print_r($HTTP_GET_VARS, true) . "\n\n";
+        if (!empty($_GET)) {
+          $email_body .= '$_GET:' . "\n\n" . print_r($_GET, true) . "\n\n";
         }
 
         if (!empty($email_body)) {

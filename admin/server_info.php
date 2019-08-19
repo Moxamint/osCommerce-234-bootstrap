@@ -12,7 +12,7 @@
 
   require('includes/application_top.php');
 
-  $action = (isset($HTTP_GET_VARS['action']) ? $HTTP_GET_VARS['action'] : '');
+  $action = (isset($_GET['action']) ? $_GET['action'] : '');
 
   switch ($action) {
     case 'export':
@@ -66,7 +66,7 @@
         $messageStack->add_session(SUCCESS_INFO_SUBMIT, 'success');
       }
 
-      tep_redirect(tep_href_link(FILENAME_SERVER_INFO));
+      tep_redirect(tep_href_link('server_info.php'));
     break;
 
     case 'save':
@@ -84,7 +84,7 @@
       break;
   }
 
-  require(DIR_WS_INCLUDES . 'template_top.php');
+  require('includes/template_top.php');
 ?>
 
     <table border="0" width="100%" cellspacing="0" cellpadding="2">
@@ -119,7 +119,7 @@
         <td><?php echo tep_draw_separator('pixel_trans.gif', '1', '10'); ?></td>
       </tr>
       <tr>
-          <td align="right" class="smallText"><?php echo tep_draw_button(IMAGE_SEND, 'arrowreturnthick-1-n', tep_href_link(FILENAME_SERVER_INFO, 'action=submit'), 'primary') . tep_draw_button(IMAGE_SAVE, 'disk', tep_href_link(FILENAME_SERVER_INFO, 'action=save'), 'primary');?>
+          <td align="right" class="smallText"><?php echo tep_draw_button(IMAGE_SEND, 'arrowreturnthick-1-n', tep_href_link('server_info.php', 'action=submit'), 'primary') . tep_draw_button(IMAGE_SAVE, 'disk', tep_href_link('server_info.php', 'action=save'), 'primary');?>
       </tr>
   <?php
   } else {
@@ -168,7 +168,7 @@
             <td><?php echo tep_draw_separator('pixel_trans.gif', '1', '10'); ?></td>
           </tr>
           <tr>
-            <td class="smallText"><?php echo tep_draw_button(IMAGE_EXPORT, 'triangle-1-nw', tep_href_link(FILENAME_SERVER_INFO, 'action=export'));?></td>
+            <td class="smallText"><?php echo tep_draw_button(IMAGE_EXPORT, 'triangle-1-nw', tep_href_link('server_info.php', 'action=export'));?></td>
           </tr>
         </table></td>
       </tr>
@@ -177,9 +177,6 @@
       </tr>
       <tr>
         <td>
-<?php
-  if (function_exists('ob_start')) {
-?>
 <style type="text/css">
 body, td, th {font-family: sans-serif; font-size: 10px;}
 .p {text-align: left;}
@@ -190,21 +187,18 @@ i {color: #666666;}
 hr {display: none;}
 </style>
 <?php
-    ob_start();
-    phpinfo();
-    $phpinfo = ob_get_contents();
-    ob_end_clean();
+  ob_start();
+  phpinfo();
+  $phpinfo = ob_get_contents();
+  ob_end_clean();
 
-    $phpinfo = str_replace('border: 1px', '', $phpinfo);
-    preg_match('/<body>(.*)<\/body>/is', $phpinfo, $regs);
-    echo '<table border="1" cellpadding="3" width="600" style="border: 0px; border-color: #000000;">' .
-         '  <tr><td><a href="http://www.oscommerce.com"><img border="0" src="images/oscommerce.png" title="osCommerce Online Merchant v' . tep_get_version() . '" /></a><h1 class="p">osCommerce Online Merchant v' . tep_get_version() . '</h1></td>' .
-         '  </tr>' .
-         '</table>';
-    echo $regs[1];
-  } else {
-    phpinfo();
-  }
+  $phpinfo = str_replace('border: 1px', '', $phpinfo);
+  preg_match('/<body>(.*)<\/body>/is', $phpinfo, $regs);
+  echo '<table border="1" cellpadding="3" width="600" style="border: 0px; border-color: #000000;">' .
+       '  <tr><td><a href="http://www.oscommerce.com"><img border="0" src="images/oscommerce.png" title="OSCOM CE Phoenix v' . tep_get_version() . '" /></a><h1 class="p">osCommerce Online Merchant v' . tep_get_version() . '</h1></td>' .
+       '  </tr>' .
+       '</table>';
+  echo $regs[1];
 ?>
         </td>
       </tr>
@@ -214,6 +208,6 @@ hr {display: none;}
     </table>
 
 <?php
-  require(DIR_WS_INCLUDES . 'template_bottom.php');
-  require(DIR_WS_INCLUDES . 'application_bottom.php');
+  require('includes/template_bottom.php');
+  require('includes/application_bottom.php');
 ?>

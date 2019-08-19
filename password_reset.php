@@ -5,26 +5,26 @@
   osCommerce, Open Source E-Commerce Solutions
   http://www.oscommerce.com
 
-  Copyright (c) 2012 osCommerce
+  Copyright (c) 2018 osCommerce
 
   Released under the GNU General Public License
 */
 
   require('includes/application_top.php');
 
-  require(DIR_WS_LANGUAGES . $language . '/' . FILENAME_PASSWORD_RESET);
+  require('includes/languages/' . $language . '/password_reset.php');
 
   $error = false;
 
-  if ( !isset($HTTP_GET_VARS['account']) || !isset($HTTP_GET_VARS['key']) ) {
+  if ( !isset($_GET['account']) || !isset($_GET['key']) ) {
     $error = true;
 
     $messageStack->add_session('password_forgotten', TEXT_NO_RESET_LINK_FOUND);
   }
 
   if ($error == false) {
-    $email_address = tep_db_prepare_input($HTTP_GET_VARS['account']);
-    $password_key = tep_db_prepare_input($HTTP_GET_VARS['key']);
+    $email_address = tep_db_prepare_input($_GET['account']);
+    $password_key = tep_db_prepare_input($_GET['key']);
 
     if ( (strlen($email_address) < ENTRY_EMAIL_ADDRESS_MIN_LENGTH) || (tep_validate_email($email_address) == false) ) {
       $error = true;
@@ -35,7 +35,7 @@
 
       $messageStack->add_session('password_forgotten', TEXT_NO_RESET_LINK_FOUND);
     } else {
-      $check_customer_query = tep_db_query("select c.customers_id, c.customers_email_address, ci.password_reset_key, ci.password_reset_date from " . TABLE_CUSTOMERS . " c, " . TABLE_CUSTOMERS_INFO . " ci where c.customers_email_address = '" . tep_db_input($email_address) . "' and c.customers_id = ci.customers_info_id");
+      $check_customer_query = tep_db_query("select c.customers_id, c.customers_email_address, ci.password_reset_key, ci.password_reset_date from customers c, customers_info ci where c.customers_email_address = '" . tep_db_input($email_address) . "' and c.customers_id = ci.customers_info_id");
       if (tep_db_num_rows($check_customer_query)) {
         $check_customer = tep_db_fetch_array($check_customer_query);
 
@@ -53,12 +53,12 @@
   }
 
   if ($error == true) {
-    tep_redirect(tep_href_link(FILENAME_PASSWORD_FORGOTTEN));
+    tep_redirect(tep_href_link('password_forgotten.php'));
   }
 
-  if (isset($HTTP_GET_VARS['action']) && ($HTTP_GET_VARS['action'] == 'process') && isset($HTTP_POST_VARS['formid']) && ($HTTP_POST_VARS['formid'] == $sessiontoken)) {
-    $password_new = tep_db_prepare_input($HTTP_POST_VARS['password']);
-    $password_confirmation = tep_db_prepare_input($HTTP_POST_VARS['confirmation']);
+  if (isset($_GET['action']) && ($_GET['action'] == 'process') && isset($_POST['formid']) && ($_POST['formid'] == $sessiontoken)) {
+    $password_new = tep_db_prepare_input($_POST['password']);
+    $password_confirmation = tep_db_prepare_input($_POST['confirmation']);
 
     if (strlen($password_new) < ENTRY_PASSWORD_MIN_LENGTH) {
       $error = true;
@@ -71,26 +71,23 @@
     }
 
     if ($error == false) {
-      tep_db_query("update " . TABLE_CUSTOMERS . " set customers_password = '" . tep_encrypt_password($password_new) . "' where customers_id = '" . (int)$check_customer['customers_id'] . "'");
+      tep_db_query("update customers set customers_password = '" . tep_encrypt_password($password_new) . "' where customers_id = '" . (int)$check_customer['customers_id'] . "'");
 
-      tep_db_query("update " . TABLE_CUSTOMERS_INFO . " set customers_info_date_account_last_modified = now(), password_reset_key = null, password_reset_date = null where customers_info_id = '" . (int)$check_customer['customers_id'] . "'");
+      tep_db_query("update customers_info set customers_info_date_account_last_modified = now(), password_reset_key = null, password_reset_date = null where customers_info_id = '" . (int)$check_customer['customers_id'] . "'");
 
       $messageStack->add_session('login', SUCCESS_PASSWORD_RESET, 'success');
 
-      tep_redirect(tep_href_link(FILENAME_LOGIN, '', 'SSL'));
+      tep_redirect(tep_href_link('login.php', '', 'SSL'));
     }
   }
 
-  $breadcrumb->add(NAVBAR_TITLE_1, tep_href_link(FILENAME_LOGIN, '', 'SSL'));
+  $breadcrumb->add(NAVBAR_TITLE_1, tep_href_link('login.php', '', 'SSL'));
   $breadcrumb->add(NAVBAR_TITLE_2);
 
-  require(DIR_WS_INCLUDES . 'template_top.php');
-  require('includes/form_check.js.php');
+  require('includes/template_top.php');
 ?>
 
-<div class="page-header">
-  <h1><?php echo HEADING_TITLE; ?></h1>
-</div>
+<h1 class="display-4"><?php echo HEADING_TITLE; ?></h1>
 
 <?php
   if ($messageStack->size('password_reset') > 0) {
@@ -98,36 +95,34 @@
   }
 ?>
 
-<?php echo tep_draw_form('password_reset', tep_href_link(FILENAME_PASSWORD_RESET, 'account=' . $email_address . '&key=' . $password_key . '&action=process', 'SSL'), 'post', 'class="form-horizontal" onsubmit="return check_form(password_reset);"', true); ?>
+<?php echo tep_draw_form('password_reset', tep_href_link('password_reset.php', 'account=' . $email_address . '&key=' . $password_key . '&action=process', 'SSL'), 'post', '', true); ?>
 
 <div class="contentContainer">
-  <div class="contentText">
-    <div class="alert alert-info"><?php echo TEXT_MAIN; ?></div>
-    
-    <div class="form-group has-feedback">
-      <label for="inputPassword" class="control-label col-sm-3"><?php echo ENTRY_PASSWORD; ?></label>
-      <div class="col-sm-9">
-        <?php echo tep_draw_input_field('password', NULL, 'required aria-required="true"  autofocus="autofocus" id="inputPassword" placeholder="' . ENTRY_PASSWORD . '"'); ?>
-        <?php echo FORM_REQUIRED_INPUT; ?>
-      </div>
+  <div class="alert alert-info" role="alert"><?php echo TEXT_MAIN; ?></div>
+  
+  <div class="form-group row">
+    <label for="inputPassword" class="col-form-label col-sm-3 text-left text-sm-right"><?php echo ENTRY_PASSWORD; ?></label>
+    <div class="col-sm-9">
+      <?php echo tep_draw_input_field('password', NULL, 'required aria-required="true" autofocus="autofocus" id="inputPassword" autocomplete="new-password" placeholder="' . ENTRY_PASSWORD_TEXT . '"', 'password'); ?>
+      <?php echo FORM_REQUIRED_INPUT; ?>
     </div>
-    <div class="form-group has-feedback">
-      <label for="inputConfirm" class="control-label col-sm-3"><?php echo ENTRY_PASSWORD_CONFIRMATION; ?></label>
-      <div class="col-sm-9">
-        <?php echo tep_draw_input_field('confirmation', NULL, 'required aria-required="true" id="inputConfirm" placeholder="' . ENTRY_PASSWORD_CONFIRMATION . '"'); ?>
-        <?php echo FORM_REQUIRED_INPUT; ?>
-      </div>
+  </div>
+  <div class="form-group row">
+    <label for="inputConfirmation" class="col-form-label col-sm-3 text-left text-sm-right"><?php echo ENTRY_PASSWORD_CONFIRMATION; ?></label>
+    <div class="col-sm-9">
+      <?php echo tep_draw_input_field('confirmation', NULL, 'required aria-required="true" id="inputConfirmation" autocomplete="new-password" placeholder="' . ENTRY_PASSWORD_CONFIRMATION_TEXT . '"', 'password'); ?>
+      <?php echo FORM_REQUIRED_INPUT; ?>
     </div>
   </div>
 
   <div class="buttonSet">
-    <div class="text-right"><?php echo tep_draw_button(IMAGE_BUTTON_CONTINUE, 'glyphicon glyphicon-chevron-right', null, 'primary', null, 'btn-success'); ?></div>
+    <div class="text-right"><?php echo tep_draw_button(IMAGE_BUTTON_CONTINUE, 'fas fa-angle-right', null, 'primary', null, 'btn-success btn-lg btn-block'); ?></div>
   </div>
 </div>
 
 </form>
 
 <?php
-  require(DIR_WS_INCLUDES . 'template_bottom.php');
-  require(DIR_WS_INCLUDES . 'application_bottom.php');
+  require('includes/template_bottom.php');
+  require('includes/application_bottom.php');
 ?>
